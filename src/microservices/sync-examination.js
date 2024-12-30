@@ -47,7 +47,6 @@ const run = async () => {
                 stage: STAGE_NAME, 
                 status: "start"
             })
-            msg.ack()
             next()
         })
 
@@ -61,6 +60,7 @@ const run = async () => {
                 status: "done"
             })
             console.log("Request:", msg.content.requestId, " done")
+            msg.ack()
         })
 
         .start()

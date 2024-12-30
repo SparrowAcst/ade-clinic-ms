@@ -1,20 +1,19 @@
 const { extend } = require("lodash")
 const { AmqpManager, Middlewares } = require('@molfar/amqp-client');
 
-const cleanRecords = require("../long-term/clean-records")
+const finalizeExamination = require("../long-term/finalize-examination")
 
 const config = require("../../.config/ade-import").rabbitmq.TEST
-const STAGE_NAME        = "Clean Records"
+const STAGE_NAME        = "Finalize Examination"
 const SERVICE_NAME      = `${STAGE_NAME} microservice`
-const DATA_CONSUMER     = config.consumer.cleanRecords
-const DATA_PUBLISHER    = config.publisher.autoAccept
+const DATA_CONSUMER     = config.consumer.finalizeExamination
 const REPORT_PUBLISHER  = config.publisher.submitExaminationReport
 
 
 const processData = async (err, msg, next) => {
     
     try {
-        let result = await cleanRecords(msg.content)
+        let result = await finalizeExamination(msg.content)
         next()
     } catch (e) {
         console.log(e.toString(). e.stack)
@@ -26,13 +25,9 @@ const run = async () => {
 
     console.log(`Configure ${SERVICE_NAME}`)
     console.log("Data Consumer:", DATA_CONSUMER)
-    console.log("Data Publisher:", DATA_PUBLISHER)
     console.log("Report Publisher:", REPORT_PUBLISHER)
 
     const consumer = await AmqpManager.createConsumer(DATA_CONSUMER)
-
-    const dataPublisher = await AmqpManager.createPublisher(DATA_PUBLISHER)
-    dataPublisher.use(Middlewares.Json.stringify)
 
     const reportPublisher = await AmqpManager.createPublisher(REPORT_PUBLISHER)
     reportPublisher.use(Middlewares.Json.stringify)
@@ -53,8 +48,6 @@ const run = async () => {
         .use(processData)
 
         .use((err, msg, next) => {
-            
-            dataPublisher.send(msg.content)
             console.log("Request:", msg.content.requestId, " done")
             reportPublisher.send({
                 requestId: msg.content.requestId,
@@ -62,7 +55,6 @@ const run = async () => {
                 status: "done"
             })
             msg.ack()
-        
         })
 
         .start()

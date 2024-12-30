@@ -7,6 +7,7 @@ const config = require("../../.config/ade-import").rabbitmq.TEST
 const STAGE_NAME        = "Auto Accept"
 const SERVICE_NAME      = `${STAGE_NAME} microservice`
 const DATA_CONSUMER     = config.consumer.autoAccept
+// const DATA_PUBLISHER    = config.publisher.finalizeExamination
 const REPORT_PUBLISHER  = config.publisher.submitExaminationReport
 
 
@@ -29,6 +30,9 @@ const run = async () => {
 
     const consumer = await AmqpManager.createConsumer(DATA_CONSUMER)
 
+    // const dataPublisher = await AmqpManager.createPublisher(DATA_PUBLISHER)
+    // dataPublisher.use(Middlewares.Json.stringify)
+
     const reportPublisher = await AmqpManager.createPublisher(REPORT_PUBLISHER)
     reportPublisher.use(Middlewares.Json.stringify)
 
@@ -42,19 +46,21 @@ const run = async () => {
                 stage: STAGE_NAME, 
                 status: "start"
             })
-            msg.ack()
             next()
         })
 
         .use(processData)
 
         .use((err, msg, next) => {
+            // dataPublisher.send(msg.content)
             console.log("Request:", msg.content.requestId, " done")
             reportPublisher.send({
                 requestId: msg.content.requestId,
                 stage: STAGE_NAME, 
                 status: "done"
             })
+            msg.ack()
+
         })
 
         .start()

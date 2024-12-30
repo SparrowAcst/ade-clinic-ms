@@ -265,21 +265,22 @@ module.exports = async settings => {
 
         // // finalize in clinic
 
-        // await docdb.updateOne({
-        //     db: clinicDB,
-        //     collection: `${clinicDB.name}.forms`,
-        //     filter:{"examination.patientId": patientId},
-        //     data: {
-        //         "examination.state": "finalized",
-        //         "status": "finalized"
-        //     }
-        // })
+        await docdb.updateOne({
+            db: "CLINIC",
+            collection: `sparrow-clinic.forms`,
+            filter:{"examination.patientId": patientId},
+            data: {
+                "examination.state": "finalized",
+                "status": "finalized"
+            }
+        })
 
 
         return {
             examinationId: EXAMINATION_ID,
             records: recordCommands.map(d => d.replaceOne.replacement)
         }
+        
     } catch (e) {
         console.log(e.toString(), e.stack)
     }
