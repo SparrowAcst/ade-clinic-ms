@@ -110,7 +110,9 @@ const migrateFB2S3 = async ({ id, fbUrl }) => {
 const migrateRecords = async ( settings, publisher ) => {
     try {
         let { records, requestId } = settings
-       
+        
+        if (!records) return
+        
         console.log(`LONG-TERM: Migrate Records: started`, requestId)
 
         console.log("TEMP DIR:", TEMP_DIR)
@@ -121,7 +123,7 @@ const migrateRecords = async ( settings, publisher ) => {
         }
 
         let i = 0
-        
+
         for(let record of records){
             
             i++
