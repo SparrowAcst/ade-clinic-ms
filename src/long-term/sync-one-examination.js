@@ -60,7 +60,7 @@ const buildExaminationCommand = data => {
 
     return [{
         replaceOne: {
-            "filter": { patientId: result.patientId },
+            "filter": { id: result.id },
             "replacement": result,
             "upsert": true
         }
@@ -112,7 +112,7 @@ const buildRecordCommands = data => {
         replaceOne: {
             "filter": {
 
-                "patientId": d.patientId,
+                "examinationId": d.examinationId,
                 "Body Position": d["Body Position"],
                 "Body Spot": d["Body Spot"],
                 "model": d.model
@@ -219,6 +219,8 @@ module.exports = async settings => {
         examination.siteId = SITE_ID
         const examinationCommands = buildExaminationCommand(examination)
 
+        // console.log(`${SCHEMA}.examinations`, JSON.stringify(examinationCommands, null, " "))
+        
         if (examinationCommands.length > 0) {
             await docdb.bulkWrite({
                 db: "TEST", //"ADE",
@@ -229,6 +231,9 @@ module.exports = async settings => {
 
         // import records
         const recordCommands = buildRecordCommands(examination)
+
+        // console.log(`${SCHEMA}.labels`, JSON.stringify(recordCommands, null, " "))
+        
 
         if (recordCommands.length > 0) {
             await docdb.bulkWrite({
