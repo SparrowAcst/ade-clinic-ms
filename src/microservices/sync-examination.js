@@ -59,7 +59,7 @@ const run = async () => {
                     stage: STAGE_NAME, 
                     status: "error",
                     message: msg.content,
-                    error: err
+                    error: err.toString()
                 })
             }
             next()
