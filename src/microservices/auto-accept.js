@@ -14,7 +14,9 @@ const REPORT_PUBLISHER  = config.publisher.submitExaminationReport
 const processData = async (err, msg, next) => {
     
     try {
-        let result = await autoAccept(msg.content)
+        if(msg.content.records){
+            let result = await autoAccept(msg.content)
+        }
         next()
     } catch (e) {
         console.log(e.toString(), e.stack)
