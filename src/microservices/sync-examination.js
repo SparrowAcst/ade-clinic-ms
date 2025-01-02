@@ -17,7 +17,7 @@ const processData = async (err, msg, next) => {
         msg.content = extend( msg.content, result )
         next()
     } catch (e) {
-        console.log(e.toString(). e.stack)
+        console.log(e.toString(), e.stack)
         throw e
     }    
 }
