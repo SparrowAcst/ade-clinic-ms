@@ -12,6 +12,10 @@ const config = require("../../.config/ade-import")
 const ADE_DATABASE = config.ADE_DATABASE
 const CLINIC_DATABASE = config.CLINIC_DATABASE
 
+
+console.log(CLINIC_DATABASE, config.docdb[CLINIC_DATABASE])
+console.log(ADE_DATABASE, config.docdb[ADE_DATABASE])
+
 const getSubmitedForm = async patientId => {
 
     data = await docdb.aggregate({
