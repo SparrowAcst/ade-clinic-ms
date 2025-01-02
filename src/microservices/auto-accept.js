@@ -17,7 +17,7 @@ const processData = async (err, msg, next) => {
         let result = await autoAccept(msg.content)
         next()
     } catch (e) {
-        console.log(e.toString(). e.stack)
+        console.log(e.toString(), e.stack)
         throw e
     }
 }
@@ -52,13 +52,15 @@ const run = async () => {
         .use(processData)
 
         .use((err, msg, next) => {
-            reportPublisher.send({
-                requestId: msg.content.requestId,
-                stage: STAGE_NAME, 
-                status: "error",
-                message: msg.content,
-                error: err
-            })
+            if(err){
+                reportPublisher.send({
+                    requestId: msg.content.requestId,
+                    stage: STAGE_NAME, 
+                    status: "error",
+                    message: msg.content,
+                    error: err.toString()
+                })
+            }
             next()
         })
         .use(Middlewares.Error.Log)
