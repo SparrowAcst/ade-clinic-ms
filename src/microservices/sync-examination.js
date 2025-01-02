@@ -53,6 +53,20 @@ const run = async () => {
         .use(processData)
 
         .use((err, msg, next) => {
+            reportPublisher.send({
+                requestId: msg.content.requestId,
+                stage: STAGE_NAME, 
+                status: "error",
+                message: msg.content,
+                error: err
+            })
+            next()
+        })
+        .use(Middlewares.Error.Log)
+        .use(Middlewares.Error.BreakChain)
+
+
+        .use((err, msg, next) => {
             dataPublisher.send(msg.content)
             reportPublisher.send({
                 requestId: msg.content.requestId,
