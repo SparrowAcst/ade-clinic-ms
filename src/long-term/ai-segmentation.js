@@ -3,7 +3,9 @@ const uuid = require("uuid").v4
 const axios = require("axios")
 const docdb = require("../utils/docdb")
 
-const AI_SEGMENTATION_API = "https://eu5zfsjntmqmf7o6ycrcxyry4a0rikmc.lambda-url.us-east-1.on.aws/"
+const config = require("../../.config/ade-import")
+const AI_SEGMENTATION_API = config.AI_SEGMENTATION_API
+const ADE_DATABASE = config.ADE_DATABASE
 
 const transformAI2v2 = data => {
 
@@ -164,7 +166,7 @@ const updateAISegmentation = async (settings, publisher) => {
         }
 
         await docdb.bulkWrite({
-            db: "TEST", //"ADE",
+            db: ADE_DATABASE, //"ADE",
             collection: `${SCHEMA}.labels`,
             commands
         })

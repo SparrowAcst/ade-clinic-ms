@@ -1,20 +1,15 @@
-const { extend, isArray, first, last } = require("lodash")
-const uuid = require("uuid").v4
-const docdb = require("../utils/docdb")
+const { last } = require("lodash")
 const fs = require("fs")
 const { makeDir, pathExists} = require("../utils/file-system")
 const axios = require("axios")
 const path = require("path")
 const s3bucket = require("../utils/s3-bucket")
-const filesize = require("file-size")
 const { extension, lookup } = require("mime-types")
 const AdmZip = require('adm-zip')
 const detect = require('detect-file-type')
 
 const DEST = "ADE-RECORDS"
 const TEMP_DIR = path.resolve(__dirname, "../../../temp")
-
-
 
 const downloadFile = async (url, dest) => {
     const res = await axios.get(url, { responseType: 'arraybuffer' });

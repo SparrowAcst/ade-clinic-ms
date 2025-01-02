@@ -1,7 +1,9 @@
 const { extend, isArray } = require("lodash")
 const docdb = require("../utils/docdb")
 
-// const con = require("../../.config/ade-import")
+const config = require("../../.config/ade-import")
+const ADE_DATABASE = config.ADE_DATABASE
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -205,7 +207,7 @@ const acceptExamination = async (examination, SCHEMA) => {
     console.log(`LONG-TERM: autoaccept: update ${SCHEMA}.examinations`)
 
     await docdb.updateOne({
-        db: "TEST", //"ADE",
+        db: ADE_DATABASE, //"ADE",
         collection: `${SCHEMA}.examinations`,
         filter: {
             id: examination.id
@@ -256,7 +258,7 @@ const autoAccept = async settings => {
         ]
 
         let examination = await docdb.aggregate({
-            db: "TEST", //"ADE",
+            db: ADE_DATABASE, //"ADE",
             collection: `${SCHEMA}.examinations`,
             pipeline
         })

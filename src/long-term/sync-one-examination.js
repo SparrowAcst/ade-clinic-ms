@@ -7,6 +7,11 @@ const path = require("path")
 
 const s3 = require("../../.config/ade-clinic").s3
 
+
+const config = require("../../.config/ade-import")
+const ADE_DATABASE = config.ADE_DATABASE
+const CLINIC_DATABASE = config.CLINIC_DATABASE
+
 const getSubmitedForm = async patientId => {
 
     data = await docdb.aggregate({
@@ -133,7 +138,7 @@ const saveEncoding = async (data, SCHEMA) => {
 
     if (data.length > 0) {
         await docdb.bulkWrite({
-            db: "TEST", // "ADE",
+            db: ADE_DATABASE, // "ADE",
             collection: `ADE-ENCODING.${SCHEMA}-files`,
             commands: data.map(d => ({
                 replaceOne: {
@@ -223,7 +228,7 @@ module.exports = async settings => {
         
         if (examinationCommands.length > 0) {
             await docdb.bulkWrite({
-                db: "TEST", //"ADE",
+                db: ADE_DATABASE, //"ADE",
                 collection: `${SCHEMA}.examinations`,
                 commands: examinationCommands
             })
@@ -237,7 +242,7 @@ module.exports = async settings => {
 
         if (recordCommands.length > 0) {
             await docdb.bulkWrite({
-                db: "TEST", //"ADE",
+                db: ADE_DATABASE, //"ADE",
                 collection: `${SCHEMA}.labels`,
                 commands: recordCommands
             })
@@ -266,7 +271,7 @@ module.exports = async settings => {
         // // finalize in clinic
 
         await docdb.updateOne({
-            db: "CLINIC",
+            db: CLINIC_DATABASE,
             collection: `sparrow-clinic.forms`,
             filter:{"examination.patientId": patientId},
             data: {
@@ -280,7 +285,7 @@ module.exports = async settings => {
             examinationId: EXAMINATION_ID,
             records: recordCommands.map(d => d.replaceOne.replacement)
         }
-        
+
     } catch (e) {
         console.log(e.toString(), e.stack)
     }

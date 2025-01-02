@@ -1,5 +1,8 @@
 
 const docdb = require("../utils/docdb")
+const config = require("../../.config/ade-import")
+const ADE_DATABASE = config.ADE_DATABASE
+
 
 const cleanRecords = async settings => {
 
@@ -28,7 +31,7 @@ const cleanRecords = async settings => {
     console.log(`LONG-TERM: Clean Records: update ${commands.length} items in ${SCHEMA}.labels`)
     
     await docdb.bulkWrite({
-                db: "TEST", //"ADE",
+                db: ADE_DATABASE, //"ADE",
                 collection: `${SCHEMA}.labels`,
                 commands
             })
