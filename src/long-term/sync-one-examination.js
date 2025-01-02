@@ -292,5 +292,6 @@ module.exports = async settings => {
 
     } catch (e) {
         console.log(e.toString(), e.stack)
+        throw e
     }
 }

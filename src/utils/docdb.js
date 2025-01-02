@@ -3,6 +3,7 @@ const { extend, keys } = require("lodash")
 const mongo = require('mongodb').MongoClient
 
 let CONFIG = require("../../.config/ade-clinic/docdb/docdb.conf")
+// const CONFIG  = require("../../.config/ade-import").docdb
 
 let clients = 0
 
