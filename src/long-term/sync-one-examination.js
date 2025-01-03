@@ -180,7 +180,7 @@ const resolveAttachements = async (data, SCHEMA) => {
             a.url = await s3bucket.getPresignedUrl(a.path)
         }
 
-        await saveEncoding(encoding, SCHEMA)
+        // await saveEncoding(encoding, SCHEMA)
     }
     return data
 }
@@ -197,7 +197,7 @@ const resolveEcho = async (data, SCHEMA) => {
         data.echo.dataPath = destination
         data.echo.dataUrl = await s3bucket.getPresignedUrl(data.echo.dataPath)
 
-        await saveEncoding({ path: destination, ref: source }, SCHEMA)
+        // await saveEncoding({ path: destination, ref: source }, SCHEMA)
 
     }
     return data
@@ -232,7 +232,7 @@ module.exports = async settings => {
         
         if (examinationCommands.length > 0) {
             await docdb.bulkWrite({
-                db: ADE_DATABASE, //"ADE",
+                db: ADE_DATABASE, 
                 collection: `${SCHEMA}.examinations`,
                 commands: examinationCommands
             })
@@ -240,6 +240,13 @@ module.exports = async settings => {
 
         // import records
         const recordCommands = buildRecordCommands(examination)
+        
+        let sourceRecords = examination.recordings.map( (r, index) => {
+            const src = recordCommands[index].replaceOne.replacement
+            r.uuid = src.id
+            return r
+        })
+
 
         // console.log(`${SCHEMA}.labels`, JSON.stringify(recordCommands, null, " "))
         
@@ -279,14 +286,17 @@ module.exports = async settings => {
             collection: `sparrow-clinic.forms`,
             filter:{"examination.patientId": patientId},
             data: {
+                "uuid": EXAMINATION_ID,
                 "examination.state": "finalized",
-                "status": "finalized"
+                "status": "finalized",
+                "submitedAt": new Date()
             }
         })
 
 
         return {
             examinationId: EXAMINATION_ID,
+            sourceRecords,
             records: recordCommands.map(d => d.replaceOne.replacement)
         }
 

@@ -6,6 +6,7 @@ const docdb = require("../utils/docdb")
 const config = require("../../.config/ade-import")
 const AI_SEGMENTATION_API = config.AI_SEGMENTATION_API
 const ADE_DATABASE = config.ADE_DATABASE
+const CLINIC_DATABASE= config.CLINIC_DATABASE
 
 const transformAI2v2 = data => {
 
@@ -127,10 +128,11 @@ const getAISegmentation = async (settings, publisher) => {
 const updateAISegmentation = async (settings, publisher) => {
 
 
-    let { records, user, requestId } = settings
+    let { records, user, requestId, examinationId, sourceRecords } = settings
 
     const SCHEMA = user.submit.schema
 
+    console.log("sourceRecords", sourceRecords)
 
     ///////////////////// debug /////////////////////////    
     // records = records.slice(0,3)
@@ -141,8 +143,39 @@ const updateAISegmentation = async (settings, publisher) => {
 
     try {
 
+        sourceRecords = sourceRecords.map( (r, index) => {
+            let s = segmentations[index]
+            if(!s.error && s.data){
+                r.quality = s.data.quality
+            } 
+            return r
+        })
 
-        let commands = segmentations
+        let commands = [
+            {
+                updateOne: {
+                    filter: {
+                        uuid: examinationId
+                    },
+                    update: {
+                        $set: {
+                            recordings: sourceRecords,
+                        }
+                    },
+                    upsert: true
+                }
+            }
+        ]
+
+        await docdb.bulkWrite({
+            db: CLINIC_DATABASE, //"ADE",
+            collection: `sparrow-clinic.forms`,
+            commands
+        })
+
+
+
+        commands = segmentations
             .filter(s => !s.error)
             .map(s => ({
                 updateOne: {
@@ -158,6 +191,7 @@ const updateAISegmentation = async (settings, publisher) => {
                 }
             }))
 
+        
         console.log(`LONG-TERM: updateAISegmentation: update ${commands.length} items in ${SCHEMA}.labels`)
 
 
@@ -170,6 +204,9 @@ const updateAISegmentation = async (settings, publisher) => {
             collection: `${SCHEMA}.labels`,
             commands
         })
+
+
+
     } catch (e) {
         console.log(e.toString(), e.stack)
         throw e

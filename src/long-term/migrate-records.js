@@ -104,6 +104,7 @@ const migrateFB2S3 = async ({ id, fbUrl }) => {
 
 const migrateRecords = async ( settings, publisher ) => {
     try {
+        
         let { records, requestId } = settings
         
         if (!records) return
@@ -136,6 +137,7 @@ const migrateRecords = async ( settings, publisher ) => {
                 progress: Number.parseFloat((100 * i/records.length).toFixed(2))
             })
         }
+
     } catch(e) {
         console.log(e.toString(), e.stack)
         throw e
