@@ -287,9 +287,11 @@ module.exports = async settings => {
             filter:{"examination.patientId": patientId},
             data: {
                 "uuid": EXAMINATION_ID,
+                "siteId": SITE_ID,
                 "examination.state": "finalized",
                 "status": "finalized",
-                "submitedAt": new Date()
+                "submitedAt": new Date(),
+                "adeStatus": "inReview"
             }
         })
 
