@@ -213,7 +213,37 @@ const checkRecordsQuality = records => ((records.filter(r => r.qty == "bad").len
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const indicateRecordsQuality = records => {
+    
+    const categories = ["good", "bad"]
+    let rec = examination.recordings.filter(r => {
+        return [
+            "apex",
+            "tricuspid",
+            "pulmonic",
+            "aortic",
+            "rightCarotid",
+            "erbs",
+            "erbsRight",
+        ].includes(r.spot)
+    })
 
+    let values = categories.map(c => ({
+        value: c,
+        count: req.filter(d => d.quality == c).length
+    }))
+
+    values.push({
+        value: "undefined",
+        count: rec.length - keys(values).map(key => values[key].count).reduce((a,b) => a+b, 0)
+    })
+
+    return {
+        values,
+        total: rec.length
+    }    
+
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -242,7 +272,8 @@ const acceptExamination = async (examination, SCHEMA) => {
 
 const updateClinicExamination = async (examination, state) => {
     let data = {
-        criteria: state.criteria
+        criteria: state.criteria,
+        quality: state.quality
     }
 
     if(state.accepted){
@@ -326,7 +357,8 @@ const autoAccept = async settings => {
 
             await updateClinicExamination(examination, {
                 accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
-                criteria: indicateRules(examination.forms)
+                criteria: indicateRules(examination.forms),
+                quality: indicateRecordsQuality(examination.recordings)
             })
         }
 
