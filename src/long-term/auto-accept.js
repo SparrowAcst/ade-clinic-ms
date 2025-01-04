@@ -3,6 +3,7 @@ const docdb = require("../utils/docdb")
 
 const config = require("../../.config/ade-import")
 const ADE_DATABASE = config.ADE_DATABASE
+const CLINIC_DATABASE = config.CLINIC_DATABASE
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,16 +139,16 @@ const checkRules = data => {
 }
 
 
-const indicateRules = data => {
+const indicateCompleteRules = data => {
 
-    let result = 
-        patientRules.map(r => ({p:r(data.patient.data)}))
-            .concat(
-                echoRules.map(r => ({e: r(data.echo.data)}))
+    let result =
+        patientRules.map(r => r(data.patient.data))
+        .concat(
+            echoRules.map(r => r(data.echo.data))
         )
-    return result
 
-
+    result = result.filter(r => r != false)
+    return (result.length > 0) ? result : ["no acceptance criteria"]
 }
 
 
@@ -190,13 +191,30 @@ const checkSapRules = data => {
     return (result.length == 0) ? false : result
 }
 
+
+const indicateSapRules = data => {
+
+    let result = sapRuless.map(r => r(data))
+    result = result.filter(r => r != false)
+    return (result.length > 0) ? result : ["no acceptance criteria"]
+
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const checkAcceptanceCriteria = v => (v.protocol == "Complete Protocol" || !v.protocol) ? checkRules(v) : checkSapRules(v)
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const indicateRules = v => (v.protocol == "Complete Protocol" || !v.protocol) ? indicateCompleteRules(v) : indicateSapRules(v)
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const checkRecordsQuality = records => ((records.filter(r => r.qty == "bad").length) / records.length) < 0.1
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -220,6 +238,30 @@ const acceptExamination = async (examination, SCHEMA) => {
     })
 
 }
+
+
+const updateClinicExamination = async (examination, state) => {
+    let data = {
+        criteria: state.criteria
+    }
+
+    if(state.accepted){
+        data.state = "accepted",
+        data.updatedAt = new Date()
+        data.updatedBy = "AUTO ACCEPT"
+    }
+
+    await docdb.updateOne({
+        db: ADE_DATABASE, //"ADE",
+        collection: `${SCHEMA}.examinations`,
+        filter: {
+            uuid: examination.id
+        },
+        data
+    })
+
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -258,29 +300,34 @@ const autoAccept = async settings => {
         ]
 
         let examination = await docdb.aggregate({
-            db: ADE_DATABASE, //"ADE",
+            db: ADE_DATABASE,
             collection: `${SCHEMA}.examinations`,
             pipeline
         })
 
         examination = examination[0]
 
-        
-        if(examination) {
+
+        if (examination) {
 
             examination.records = examination.records
-                                    .filter( r => availableBodySpots.includes(r["Body Spot"]))
-                                    .map( r => ({
-                                        id: r.id,
-                                        qty: (r.aiSegmentation) ? r.aiSegmentation.quality : undefined
-                                    })) 
-            
-            
+                .filter(r => availableBodySpots.includes(r["Body Spot"]))
+                .map(r => ({
+                    id: r.id,
+                    qty: (r.aiSegmentation) ? r.aiSegmentation.quality : undefined
+                }))
+
+
             if (checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records)) {
                 await acceptExamination(examination, SCHEMA)
             } else {
                 console.log(`LONG-TERM: autoaccept: for ${examinationId} on ${SCHEMA} - NO ACCEPTANCE CRITERIA`)
-            }    
+            }
+
+            await updateClinicExamination(examination, {
+                accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
+                criteria: indicateRules(examination.forms)
+            })
         }
 
         // console.log(`LONG-TERM: autoaccept: for ${examinationId} on ${SCHEMA} done`)
