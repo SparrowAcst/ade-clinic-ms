@@ -206,6 +206,10 @@ const updateAISegmentation = async (settings, publisher) => {
         })
 
 
+        return {
+            sourceRecords
+        }
+
 
     } catch (e) {
         console.log(e.toString(), e.stack)

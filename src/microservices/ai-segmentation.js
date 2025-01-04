@@ -31,7 +31,7 @@ const run = async () => {
     
         try {
             if(msg.content.records){
-                await updateAISegmentation(msg.content, reportPublisher)
+                msg.content.sourceRecords = await updateAISegmentation(msg.content, reportPublisher)
             }
             next()
         } catch (e) {

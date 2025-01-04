@@ -1,4 +1,4 @@
-const { extend, isArray } = require("lodash")
+const { extend, isArray, keys } = require("lodash")
 const docdb = require("../utils/docdb")
 
 const config = require("../../.config/ade-import")
@@ -230,7 +230,7 @@ const indicateRecordsQuality = records => {
 
     let values = categories.map(c => ({
         value: c,
-        count: req.filter(d => d.quality == c).length
+        count: rec.filter(d => d.quality == c).length
     }))
 
     values.push({
@@ -302,7 +302,7 @@ const updateClinicExamination = async (examination, state) => {
 
 const autoAccept = async settings => {
 
-    let { examinationId, user } = settings
+    let { examinationId, user, sourceRecords } = settings
     const SCHEMA = user.submit.schema
 
     try {
@@ -362,7 +362,7 @@ const autoAccept = async settings => {
             await updateClinicExamination(examination, {
                 accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
                 criteria: indicateRules(examination.forms),
-                quality: indicateRecordsQuality(examination.recordings)
+                quality: indicateRecordsQuality(sourceRecords)
             })
         }
 
