@@ -31,7 +31,7 @@ const run = async () => {
     
         try {
             if(msg.content.records){
-                msg.content.sourceRecords = await updateAISegmentation(msg.content, reportPublisher)
+                await updateAISegmentation(msg.content, reportPublisher)
             }
             next()
         } catch (e) {
@@ -39,8 +39,6 @@ const run = async () => {
             throw e
         }
     }
-
-
 
     await consumer
         .use(Middlewares.Json.parse)

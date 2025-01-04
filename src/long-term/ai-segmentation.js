@@ -132,8 +132,6 @@ const updateAISegmentation = async (settings, publisher) => {
 
     const SCHEMA = user.submit.schema
 
-    console.log("sourceRecords", sourceRecords)
-
     ///////////////////// debug /////////////////////////    
     // records = records.slice(0,3)
     // console.log(records)
@@ -204,12 +202,6 @@ const updateAISegmentation = async (settings, publisher) => {
             collection: `${SCHEMA}.labels`,
             commands
         })
-
-
-        return {
-            sourceRecords
-        }
-
 
     } catch (e) {
         console.log(e.toString(), e.stack)

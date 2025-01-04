@@ -224,7 +224,7 @@ const checkRecordsQuality = records => {
         ].includes(r["Body Spot"])
     })
 
-    return rec.filter(d => d.aiSegmentation.quality == "bad") <= 1
+    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.trunc(0.1*rec.length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,7 +246,7 @@ const indicateRecordsQuality = records => {
 
     let values = categories.map(c => ({
         value: c,
-        count: rec.filter(d => d.aiSegmentation.quality == c).length
+        count: rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == c).length
     }))
 
     values.push({
@@ -323,18 +323,6 @@ const autoAccept = async settings => {
 
     try {
 
-        // console.log(`LONG-TERM: autoaccept: started for ${examinationId} on ${SCHEMA}`)
-
-        const availableBodySpots = [
-            "Apex",
-            "Tricuspid",
-            "Pulmonic",
-            "Aortic",
-            "Right Carotid",
-            "Erb's",
-            "Erb's Right",
-        ]
-
         const pipeline = [{
                 $match: {
                     id: examinationId,
@@ -361,16 +349,6 @@ const autoAccept = async settings => {
 
         if (examination) {
 
-            console.log(examination.records)
-
-            // examination.records = examination.records
-            //     .filter(r => availableBodySpots.includes(r["Body Spot"]))
-            //     .map(r => ({
-            //         id: r.id,
-            //         qty: (r.aiSegmentation) ? r.aiSegmentation.quality : undefined
-            //     }))
-
-
             if (checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records)) {
                 await acceptExamination(examination, SCHEMA)
             } else {
@@ -384,7 +362,6 @@ const autoAccept = async settings => {
             })
         }
 
-        // console.log(`LONG-TERM: autoaccept: for ${examinationId} on ${SCHEMA} done`)
 
     } catch (e) {
         console.log(`LONG-TERM: autoaccept: for ${examinationId} on ${SCHEMA} error`, e.toString(), e.stack)
