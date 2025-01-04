@@ -271,15 +271,16 @@ const acceptExamination = async (examination, SCHEMA) => {
 
 
 const updateClinicExamination = async (examination, state) => {
+    
     let data = {
         criteria: state.criteria,
         quality: state.quality
     }
 
     if(state.accepted){
-        data.state = "accepted",
+        data.state = "accepted"
     } else {
-        data.state = "inReview",
+        data.state = "inReview"
     }
     
     data.updatedAt = new Date()
