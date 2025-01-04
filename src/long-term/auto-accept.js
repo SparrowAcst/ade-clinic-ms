@@ -278,9 +278,9 @@ const updateClinicExamination = async (examination, state) => {
     }
 
     if(state.accepted){
-        data.state = "accepted"
+        data.adeStatus = "accepted"
     } else {
-        data.state = "inReview"
+        data.adeStatus = "inReview"
     }
     
     data.updatedAt = new Date()
