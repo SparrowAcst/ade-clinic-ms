@@ -216,7 +216,7 @@ const checkRecordsQuality = records => ((records.filter(r => r.qty == "bad").len
 const indicateRecordsQuality = records => {
     
     const categories = ["good", "bad"]
-    let rec = examination.recordings.filter(r => {
+    let rec = records.filter(r => {
         return [
             "apex",
             "tricuspid",
