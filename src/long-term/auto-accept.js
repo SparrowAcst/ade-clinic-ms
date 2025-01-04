@@ -209,7 +209,22 @@ const indicateRules = v => (v.protocol == "Complete Protocol" || !v.protocol) ? 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const checkRecordsQuality = records => ((records.filter(r => r.qty == "bad").length) / records.length) < 0.1
+const checkRecordsQuality = records => {
+    
+    let rec = records.filter(r => {
+        return [
+            "Apex",
+            "Tricuspid",
+            "Pulmonic",
+            "Aortic",
+            "Right Carotid",
+            "Erb's",
+            "Erb's Right",
+        ].includes(r["Body Spot"])
+    })
+
+    return rec.filter(d => d.aiSegmentation.quality == "bad") <= 1
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -218,19 +233,19 @@ const indicateRecordsQuality = records => {
     const categories = ["good", "bad"]
     let rec = records.filter(r => {
         return [
-            "apex",
-            "tricuspid",
-            "pulmonic",
-            "aortic",
-            "rightCarotid",
-            "erbs",
-            "erbsRight",
-        ].includes(r.spot)
+            "Apex",
+            "Tricuspid",
+            "Pulmonic",
+            "Aortic",
+            "Right Carotid",
+            "Erb's",
+            "Erb's Right",
+        ].includes(r["Body Spot"])
     })
 
     let values = categories.map(c => ({
         value: c,
-        count: rec.filter(d => d.quality == c).length
+        count: rec.filter(d => d.aiSegmentation.quality == c).length
     }))
 
     values.push({
@@ -362,7 +377,7 @@ const autoAccept = async settings => {
             await updateClinicExamination(examination, {
                 accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
                 criteria: indicateRules(examination.forms),
-                quality: indicateRecordsQuality(sourceRecords)
+                quality: indicateRecordsQuality(examination.records)
             })
         }
 
