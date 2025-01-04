@@ -291,7 +291,7 @@ module.exports = async settings => {
                 "examination.state": "finalized",
                 "status": "finalized",
                 "submitedAt": new Date(),
-                "adeStatus": "inReview"
+                "adeStatus": "import"
             }
         })
 

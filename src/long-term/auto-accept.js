@@ -278,9 +278,12 @@ const updateClinicExamination = async (examination, state) => {
 
     if(state.accepted){
         data.state = "accepted",
-        data.updatedAt = new Date()
-        data.updatedBy = "AUTO ACCEPT"
+    } else {
+        data.state = "inReview",
     }
+    
+    data.updatedAt = new Date()
+    data.updatedBy = "AUTO ACCEPT"
 
     await docdb.updateOne({
         db: CLINIC_DATABASE,
