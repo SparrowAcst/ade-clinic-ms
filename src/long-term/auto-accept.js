@@ -224,7 +224,7 @@ const checkRecordsQuality = records => {
         ].includes(r["Body Spot"])
     })
 
-    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.trunc(0.1*rec.length)
+    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.trunc(0.15*rec.length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
