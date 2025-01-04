@@ -217,6 +217,7 @@ const checkRecordsQuality = records => {
             "Tricuspid",
             "Pulmonic",
             "Aortic",
+            "Left Carotid",
             "Right Carotid",
             "Erb's",
             "Erb's Right",
