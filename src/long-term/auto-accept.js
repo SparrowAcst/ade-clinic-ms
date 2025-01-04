@@ -252,8 +252,8 @@ const updateClinicExamination = async (examination, state) => {
     }
 
     await docdb.updateOne({
-        db: ADE_DATABASE, //"ADE",
-        collection: `${SCHEMA}.examinations`,
+        db: CLINIC_DATABASE,
+        collection: `sparrow-clinic.forms`,
         filter: {
             uuid: examination.id
         },
@@ -334,6 +334,7 @@ const autoAccept = async settings => {
 
     } catch (e) {
         console.log(`LONG-TERM: autoaccept: for ${examinationId} on ${SCHEMA} error`, e.toString(), e.stack)
+        throw e
     }
 
 }
