@@ -361,12 +361,14 @@ const autoAccept = async settings => {
 
         if (examination) {
 
-            examination.records = examination.records
-                .filter(r => availableBodySpots.includes(r["Body Spot"]))
-                .map(r => ({
-                    id: r.id,
-                    qty: (r.aiSegmentation) ? r.aiSegmentation.quality : undefined
-                }))
+            console.log(examination.records)
+
+            // examination.records = examination.records
+            //     .filter(r => availableBodySpots.includes(r["Body Spot"]))
+            //     .map(r => ({
+            //         id: r.id,
+            //         qty: (r.aiSegmentation) ? r.aiSegmentation.quality : undefined
+            //     }))
 
 
             if (checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records)) {
