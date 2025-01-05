@@ -290,7 +290,8 @@ const updateClinicExamination = async (examination, state) => {
     
     let data = {
         criteria: state.criteria,
-        quality: state.quality
+        quality: state.quality,
+        schema: state.schema
     }
 
     if(state.accepted){
@@ -358,7 +359,8 @@ const autoAccept = async settings => {
             await updateClinicExamination(examination, {
                 accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
                 criteria: indicateRules(examination.forms),
-                quality: indicateRecordsQuality(examination.records)
+                quality: indicateRecordsQuality(examination.records),
+                schema: SCHEMA
             })
         }
 
