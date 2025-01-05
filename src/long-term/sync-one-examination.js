@@ -19,7 +19,7 @@ console.log(ADE_DATABASE, config.docdb[ADE_DATABASE])
 const getSubmitedForm = async patientId => {
 
     data = await docdb.aggregate({
-        db: "CLINIC",
+        db: CLINIC_DATABASE,
         collection: `sparrow-clinic.forms`,
         pipeline: [{
                 $match: {
