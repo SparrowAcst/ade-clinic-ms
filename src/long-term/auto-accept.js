@@ -224,7 +224,7 @@ const checkRecordsQuality = records => {
         ].includes(r["Body Spot"])
     })
 
-    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.trunc(0.15*rec.length)
+    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.round(0.33*rec.length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +291,9 @@ const updateClinicExamination = async (examination, state) => {
     let data = {
         criteria: state.criteria,
         quality: state.quality,
-        schema: state.schema
+        schema: state.schema,
+        acceptCriteria: state.acceptCriteria,
+        acceptQuality: state.acceptQuality
     }
 
     if(state.accepted){
@@ -358,6 +360,8 @@ const autoAccept = async settings => {
 
             await updateClinicExamination(examination, {
                 accepted: checkAcceptanceCriteria(examination.forms) && checkRecordsQuality(examination.records),
+                acceptCriteria: checkAcceptanceCriteria(examination.forms),
+                acceptQuality: checkRecordsQuality(examination.records),
                 criteria: indicateRules(examination.forms),
                 quality: indicateRecordsQuality(examination.records),
                 schema: SCHEMA
