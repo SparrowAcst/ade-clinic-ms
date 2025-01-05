@@ -1,4 +1,4 @@
-const { extend, isArray, keys } = require("lodash")
+const { extend, isArray, keys, find } = require("lodash")
 const docdb = require("../utils/docdb")
 
 const config = require("../../.config/ade-import")
@@ -211,20 +211,11 @@ const indicateRules = v => (v.protocol == "Complete Protocol" || !v.protocol) ? 
 
 const checkRecordsQuality = records => {
     
-    let rec = records.filter(r => {
-        return [
-            "Apex",
-            "Tricuspid",
-            "Pulmonic",
-            "Aortic",
-            "Left Carotid",
-            "Right Carotid",
-            "Erb's",
-            "Erb's Right",
-        ].includes(r["Body Spot"])
-    })
+    let data = indicateRecordsQuality(records)
+    let bads = find(data.values, d => d.value == "bad")
+    bads = (bads) ? bads.count : 0
+    return bads <= Math.round(0.2 * data.total)
 
-    return rec.filter(d => d.aiSegmentation && d.aiSegmentation.quality == "bad") <= Math.round(0.33*rec.length)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
