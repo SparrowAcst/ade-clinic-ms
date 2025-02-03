@@ -212,7 +212,7 @@ const resolveEcho = async (data, SCHEMA) => {
         } catch (e) {
             data.echo.dataFileName = encodedFileName
             data.echo.dataPath = destination
-            data.echo..error = {
+            data.echo.error = {
                 source: data.echo.dataPath,
                 error: e.toString(),
                 stack: e.stack,
