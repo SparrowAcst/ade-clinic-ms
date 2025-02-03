@@ -168,16 +168,28 @@ const resolveAttachements = async (data, SCHEMA) => {
             const source = a.path
             const encodedFileName = `${uuid()}${path.extname(a.name)}`
             const destination = `${s3.root.files}/${encodedFileName}`
-            await s3bucket.copyObject({ source, destination })
             console.log(`${source} > ${destination}`)
-            encoding.push({
-                path: destination,
-                ref: source
-            })
-            a.name = encodedFileName
-            a.publicName = encodedFileName
-            a.path = destination
-            a.url = await s3bucket.getPresignedUrl(a.path)
+            try {
+                await s3bucket.copyObject({ source, destination })
+                encoding.push({
+                    path: destination,
+                    ref: source
+                })
+                a.name = encodedFileName
+                a.publicName = encodedFileName
+                a.path = destination
+                a.url = await s3bucket.getPresignedUrl(a.path)
+            } catch (e) {
+                a.name = encodedFileName
+                a.publicName = encodedFileName
+                a.path = destination
+                a.error = {
+                    source: a.path,
+                    error: e.toString(),
+                    stack: e.stack,
+                }
+            }
+
         }
 
         // await saveEncoding(encoding, SCHEMA)
@@ -191,12 +203,21 @@ const resolveEcho = async (data, SCHEMA) => {
         const source = data.echo.dataPath
         const encodedFileName = `${uuid()}${path.extname(data.echo.dataFileName)}`
         const destination = `${s3.root.echos}/${encodedFileName}`
-        await s3bucket.copyObject({ source, destination })
         console.log(`${source} > ${destination}`)
-        data.echo.dataFileName = encodedFileName
-        data.echo.dataPath = destination
-        data.echo.dataUrl = await s3bucket.getPresignedUrl(data.echo.dataPath)
-
+        try {
+            await s3bucket.copyObject({ source, destination })
+            data.echo.dataFileName = encodedFileName
+            data.echo.dataPath = destination
+            data.echo.dataUrl = await s3bucket.getPresignedUrl(data.echo.dataPath)
+        } catch (e) {
+            data.echo.dataFileName = encodedFileName
+            data.echo.dataPath = destination
+            data.echo..error = {
+                source: data.echo.dataPath,
+                error: e.toString(),
+                stack: e.stack,
+            }
+        }
         // await saveEncoding({ path: destination, ref: source }, SCHEMA)
 
     }
@@ -211,6 +232,8 @@ module.exports = async settings => {
     try {
 
         const { protocol, organization, patientId, state, user } = settings
+
+        console.log(`SYNC EXAMINATION: ${protocol} ${organization} ${patientId}`)
 
         const SCHEMA = user.submit.schema || "CLINIC-UNDEFINED-SCHEMA"
         const SITE_ID = user.submit.siteId || "SITE-ID-UNDEFINED"
@@ -229,10 +252,10 @@ module.exports = async settings => {
         const examinationCommands = buildExaminationCommand(examination)
 
         // console.log(`${SCHEMA}.examinations`, JSON.stringify(examinationCommands, null, " "))
-        
+
         if (examinationCommands.length > 0) {
             await docdb.bulkWrite({
-                db: ADE_DATABASE, 
+                db: ADE_DATABASE,
                 collection: `${SCHEMA}.examinations`,
                 commands: examinationCommands
             })
@@ -240,8 +263,8 @@ module.exports = async settings => {
 
         // import records
         const recordCommands = buildRecordCommands(examination)
-        
-        let sourceRecords = examination.recordings.map( (r, index) => {
+
+        let sourceRecords = examination.recordings.map((r, index) => {
             const src = recordCommands[index].replaceOne.replacement
             r.uuid = src.id
             return r
@@ -249,7 +272,7 @@ module.exports = async settings => {
 
 
         // console.log(`${SCHEMA}.labels`, JSON.stringify(recordCommands, null, " "))
-        
+
 
         if (recordCommands.length > 0) {
             await docdb.bulkWrite({
@@ -284,7 +307,7 @@ module.exports = async settings => {
         await docdb.updateOne({
             db: CLINIC_DATABASE,
             collection: `sparrow-clinic.forms`,
-            filter:{"examination.patientId": patientId},
+            filter: { "examination.patientId": patientId },
             data: {
                 "uuid": EXAMINATION_ID,
                 "siteId": SITE_ID,
